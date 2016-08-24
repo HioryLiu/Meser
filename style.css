@@ -1,8 +1,14 @@
 html{
   padding: 0;
 }
+body{
+  margin: 0;
+}
 #headBox{
-  margin-top: 20px;
+  left: 40px;
+  top: 20px;
+  position:absolute;
+  z-index: 1;
 }
 .mobileInput{
   margin-left:40px;
@@ -27,28 +33,35 @@ html{
 #mainBox{
   width: 90%;
   /*height: 500px;*/
-  margin-top: 10px;
-  margin-right: 20px;
-  margin-left: 40px;
+  margin-top: 0px;
+  margin-right: 0px;
+  margin-left: 0px;
 }
 #svgBox{
-  border: solid #dcdcdc 1px;
+  /*border: solid #dcdcdc 1px;*/
+  border-right:solid #dcdcdc 1px; 
   padding-bottom: 0;
-  margin-top: 15px;
+  margin-top: 0px;
 }
 #cutlineBox{
-  border: solid #dcdcdc 1px;
-  border-top: hidden;
+  /*border: solid #dcdcdc 1px;*/
   margin-top: 0;
-  width:70%;
   height: 50px; 
-  padding-top: 0;
+  position: absolute;
+  z-index: 1;
+  left: 40px;
+  bottom: 0;
 }
 div#infoBox{
   width: 250px;
   float: right;
   margin-right: 40px;
   margin-top: 20px;
+  font-family: 微软雅黑;
+}
+#mobileInfo p{
+  font-weight: bold;
+  font-size: 30;
 }
 div#infoBox tr td:nth-child(1){
       width:120px;
@@ -64,7 +77,11 @@ div#infoBox tr td:nth-child(2){
 .btnBox button{
   height: 20px;
   width: 40px;
-  border-radius: 10px;
+  border: 0;
+  background: green;
+  color: white;
+  margin-right: 10px;
+  /*border-radius: 10px;*/
 }
 
 .spinner {
@@ -141,12 +158,12 @@ div#infoBox tr td:nth-child(2){
     }
     #tooltip{
       background:rgba(0,0,0,0);
-      border:1px solid green;
+      border:1px solid blue;
       border-radius:5px;
       font-size:12px;
       width:auto;
       padding:4px;
-      color:green;
+      color:blue;
       opacity:0;
     }
     #tooltip table{
@@ -182,7 +199,7 @@ div#infoBox tr td:nth-child(2){
     overflow: hidden;   
     cursor: pointer;  
     /*border: 2px solid #999999;   */
-    border-radius: 10px;  
+    border-radius: 0;  
 }  
   
 .testswitch-inner {  
@@ -210,14 +227,14 @@ div#infoBox tr td:nth-child(2){
 .testswitch-inner::after {  
     content: attr(data-on);  
     padding-left: 10px;  
-    background-color: #00e500;   
+    background-color: green;   
     color: #FFFFFF;  
 }  
   
 .testswitch-inner::before {  
     content: attr(data-off);  
     padding-right: 10px;  
-    background-color: #0080ff;   
+    background-color: #009ACD;   
     color: #ffffff;  
     text-align: right;  
 }  
@@ -231,9 +248,9 @@ div#infoBox tr td:nth-child(2){
     background: #FFFFFF;  
     top: 0;   
     bottom: 0;  
-    right: 86px;  
+    right: 90px;  
     /*border: 2px solid #999999;   */
-    border-radius: 20px;  
+    border-radius: 0;  
     transition: all 0.3s ease-in 0s;  
 }  
   

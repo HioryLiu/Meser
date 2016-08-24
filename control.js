@@ -8,11 +8,10 @@
     }else{
       type="未知类别：";
     }
-    return "<h4>节点信息</h4><table>"+
+    return "<h4>结点信息</h4><table>"+
         "<tr><td>"+(type)+"</td><td>"+(d.value)+"</td></tr>"+
         "<tr><td>风险等级：</td><td>"+(d.riskLevel)+"</td></tr>"+
-        "<tr><td>评分：</td><td>"+(d.riskScore)+"</td></tr>"+
-        "<tr><td>out:</td><td>"+(d.out)+"</td></tr>"+
+        "<tr><td>信用分：</td><td>"+(d.riskScore)+"</td></tr>"+
         "</table>";
   }
 
@@ -26,10 +25,19 @@
   }
 
   function infoHtml(d){
-    return  "<table ><tr><td>"+(d.input.mobile_number)+"</td></tr>"+
-        "<tr><td>Group风险等级：</td><td>"+(d.output.graph.GroupFraudLevel)+"</td></tr>"+
+    return  "<table><tr><td>Group风险等级：</td><td>"+(d.output.graph.GroupFraudLevel)+"</td></tr>"+
         "<tr><td>Group风险描述：</td><td>"+(d.output.graph.GroupFraudDesc)+"</td></tr>"+
         "</table>";
+  }
+
+  function mobileHtml(d){
+    return "<p>"+(d.value)+"</p>"+
+        "<table>"+
+        "<tr><td>个人风险等级：</td><td>"+(d.riskLevel)+"</td></tr>"+
+        "<tr><td>个人信用分：</td><td>"+(d.riskScore)+"</td></tr>"+
+        // "<tr><td>Group风险等级：</td><td>"+(d.groupRisk)+"</td></tr>"+
+        // "<tr><td>Group风险描述：</td><td>"+(d.groupRiskDesc)+"</td></tr>"+
+        "</table>"; 
   }
 
    function check(d,nodes){
@@ -81,7 +89,9 @@
             console.log(typeof result);
             // console.log(result);
             // var res = JSON.parse(result);
-            d3.select("#infoBox").html(infoHtml(res));
+            // mobileInfo.groupRisk=res.output.graph.GroupFraudLevel;
+            // mobileInfo.groupRiskDesc=res.output.graph.GroupFraudDesc;
+            d3.select("#groupInfo").html(infoHtml(res));
           }
         });
       }
