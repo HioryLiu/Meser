@@ -1,40 +1,34 @@
-
 <!DOCTYPE html>
 <meta charset="utf-8">
 <link rel="stylesheet" type="text/css" href="style.css">
 <body>
-<div id="headBox">
+<div id="headBox"></div>
+<div id="topBox">
 	<input class="mobileInput" type="text" />
 	<button class="btnQuery">查询风险</button>
-	<img class="log" src="image/person1.png" align="right"/>
+  <button id="enlarge" class="zoomBtn"><b>+</b></button>
+  <button id="recovery" class="zoomBtn"><b>□</b></button>
+  <button id="compress" class="zoomBtn"><b>—</b></button> 
 </div>
-<hr/>
 <div id="mainBox" >
-<svg id="svgBox" width="70%" height="500">
+<svg id="svgBox" width="70%" style="background-image:url(image/background.jpg)">
 </svg>
-<div id="infoBox">
-<div id="mobileInfo"></div>
-<div id="groupInfo"></div>
-</div>
 <div id="cutlineBox">
 <table>
-	<tr><td><div class="testswitch">  
+  <tr><td><div class="testswitch">  
             <input class="testswitch-checkbox" id="onoffswitch" type="checkbox">  
             <label class="testswitch-label" for="onoffswitch">  
                 <span class="testswitch-inner" data-on="风险关系" data-off="二度关系"></span>  
                 <span class="testswitch-switch"></span>  
-            </label>  
-            
-</div></td>
-<td><div class="btnBox">
-	<button class="enlarge"><b>+</b></button>
-	<button class="compress"><b>—</b></button> 
+            </label>              
 </div></td></tr>
 </table>
- 
-
-
 </div>
+<div id="infoBox">
+<div id="mobileInfo"></div>
+<div id="groupInfo"></div>
+</div>
+
 </div>
 </body>
 <script src="d3.js"></script>
@@ -83,9 +77,10 @@ viewRelation(queryData,getType);
 
 function viewRelation(number,getType){
 	
-	var svg = d3.select("svg");//获取到svg
-    var width = document.body.clientWidth*0.7//返回svg的大小
-    var height = 500;
+
+  var width = document.body.clientWidth*0.7;
+  var height=(document.documentElement.clientHeight)*1;
+  var svg = d3.select("svg").attr("height",height);
 
     var tooltip = d3.select("body").append("div")
           .attr("id","tooltip") 
@@ -100,25 +95,30 @@ function viewRelation(number,getType){
     let ck=1; 
     var  zoom=d3.zoom();  
 
-    d3.select(".enlarge")
-       .on("click",function(){
+    $("#enlarge").click(function(e){
           zoom.scaleTo(svg,function(){
             console.log(ck);
-            ck=(ck+0.5)>2?2:ck+0.5;
+            ck=(ck+0.5)>2?2:ck+0.3;
             return ck;
             // return (d3.zoomTransform(svg).k+0.5)>2?2:d3.zoomTransform(svg).k+0.5;
           });
        });
 
-    d3.select(".compress")
-       .on("click",function(){
+    $("#compress").click(function(e){
           zoom.scaleTo(svg,function(){
             console.log(ck);
-            ck=(ck-0.5)<1/3?1/3:ck-0.5;
+            ck=(ck-0.5)<1/3?1/3:ck-0.3;
             return ck;
             // return (d3.zoomTransform(svg).k+0.5)>2?2:d3.zoomTransform(svg).k+0.5;
           });
        });
+    $("#recovery").click(function(e){
+      zoom.scaleTo(svg,function(){
+            console.log(ck);
+            ck=1;
+            return ck;
+          });
+    });
 
      //-----------arrow-----------------
     var defs = svg.append("defs");  
@@ -145,7 +145,7 @@ function viewRelation(number,getType){
                           .attr("orient","auto")
                           .append("path")
                           .attr("d","M2,2 L10,6 L2,10 L6,6 L2,2")
-                          .style("fill","#ca0");
+                          .style("fill","#BDB76B");
 
  console.log(queryData);
  //--------------------------------请求数据-------------------------------
@@ -153,7 +153,7 @@ function viewRelation(number,getType){
 		type:"GET",
 		url:'http://localhost:3001/'+getType+"?mobile_number="+queryData,
     // url:'http://192.168.1.101:9090/viz/'+getType+'?mobile_number='+queryData,
-    // url:'http://uat.creditx.com/graphviz/'+getType+'?mobile_number='+queryData,
+    // url:'http://uat.creditx.io/graphviz/'+getType+'?mobile_number='+queryData,
 		async:true,
 		success:function(result){
       // let result=JSON.parse(res);
@@ -167,7 +167,15 @@ function viewRelation(number,getType){
 			   .attr("opacity",0.4);
 			return;
 		}else{
+      for(i in result.nodes){
+        if (result.nodes[i].value==queryData) {
+          let riskInfo=result.nodes[i];
+          // riskInfo=$.extend(riskInfo,mobileInfo);
 
+          d3.select("#mobileInfo").html(mobileHtml(riskInfo));
+          break;
+        }
+      }
     }
     var img_w,img_h,distance,r,strength;
     
@@ -198,7 +206,7 @@ function viewRelation(number,getType){
         .force("link", d3.forceLink().id(function(d) { return d.value; }).distance(distance))
         .force("charge", d3.forceManyBody().strength(strength))
         .force("center", d3.forceCenter(width / 2, height / 2))
-        .force("collide", d3.forceCollide(15).iterations(1));
+        .force("collide", d3.forceCollide(img_w/2).iterations(1));
 
     
 
@@ -224,7 +232,7 @@ function viewRelation(number,getType){
           if (d.relation=="OWNS") {          
             return "#0ac";
           } else{
-            return "#ca0";}
+            return "#BDB76B";}
         })
         .attr("stroke-width",1)
         .attr("marker-end",function(d){
@@ -241,8 +249,8 @@ function viewRelation(number,getType){
     simulation.on("end",ended);
     simulation.alphaMin(0.1)
               .alphaTarget(0)
-        .alphaDecay(0.01)
-        .velocityDecay(0.01);
+        .alphaDecay(0.04)
+        .velocityDecay(0.04);
 
     let slink=simulation.force("link");
       slink.links(result.edges);
@@ -290,7 +298,7 @@ function viewRelation(number,getType){
                 }
               }
               if (bx>1) {
-                return 0.6;
+                return 1;
               }else if (bx>0) {
                 return .9;
               }else{
@@ -308,17 +316,20 @@ function viewRelation(number,getType){
 
         });
        
-        	console.log(getType);
-        	let circles=[];
-        	if (getType==="riskGraph") {
+  	console.log(getType);
+  	let circles=[];
+    if (getType==="riskGraph") {
 
-        	  var circle=node.filter(d=> d.out==undefined & d.type=="mobile");
-			  var image=node.filter(d=>d.out | d.type=="person");
-			  // var person=node.filter(d=>d.type=="person");
+        var circle=node.filter(function(d){
+          if (d.riskSrcType==="mobile_risk" && d.type=="mobile" && d.value!=queryData) {
+            circles.push(d.value);
+            return true;
+          }
+          return false;
+        });
+			  var image=node.filter(d=>d.riskSrcType!="mobile_risk" || d.type=="person" ||d.value==queryData);
 			  circle.append("circle")
-			        .attr("r",function(d){
-			        	return r;
-			        })
+			        .attr("r",r)
 			        .style("fill",function(d){
 			        	switch(d.riskLevel){
 			        		case 0:return "#B5B5B5";
@@ -361,28 +372,14 @@ function viewRelation(number,getType){
 			          .style("font-weight","bold")
 			          .style("cursor","default");
         	}else{
-        		circles=[];
-        	  var circle=node.select(function(d){
-        	  	for(i in result.edges){
-        	  		let edge=result.edges[i];
-        	  		if (d.type!="mobile" | edge.source.value==d.value) {
-        	  			return null;
-        	  		}
-        	  	}
-        	  	circles.push(d.value);	
-        	  	return this;
-        	  });
-        	  console.log(circle);
-
-        	  var image=node.select(function(d){
-        	  	for(i in result.edges){
-        	  		let edge=result.edges[i];
-        	  		if (d.type=="person" | edge.source.value==d.value) {
-        	  			return this;
-        	  		}
-        	  	}
-        	  	return null;
-        	  });
+        		var circle=node.filter(function(d){
+          if (d.riskSrcType==="mobile_risk" && d.type=="mobile" && d.value!=queryData) {
+            circles.push(d.value);
+            return true;
+          }
+          return false;
+        });
+        var image=node.filter(d=>d.riskSrcType!="mobile_risk" || d.type=="person" ||d.value==queryData);
         	  image.append("image")
         	  	   .attr("width",img_w)
         	  	   .attr("height",img_h)
@@ -408,9 +405,7 @@ function viewRelation(number,getType){
         	  	   });
 
         	  circle.append("circle")
-			        .attr("r",function(d){
-			        	return r;
-			        })
+			        .attr("r",r)
 			        .style("fill",function(d){
 			        	switch(d.riskLevel){
 			        		case 0:return "#B5B5B5";
@@ -430,8 +425,8 @@ function viewRelation(number,getType){
 	function ticked() {
 	  
 	    dragTick();
-	    // link.style("opacity",0);
-	    // node.style("opacity",0);
+	    link.style("opacity",0);
+	    node.style("opacity",0);
 
 	    console.log(simulation.alpha());
 	}
@@ -532,7 +527,6 @@ function viewRelation(number,getType){
       node.attr("transform",d3.event.transform);
       link.attr("transform",d3.event.transform);
     }
-
 
 }
   });

@@ -85,13 +85,11 @@
           url:"http://localhost:3001/mobileRiskGraph?mobile_number="+number,
           // url:'http://uat.creditx.io/data-viz/mobile_risk_graph?mobile_number='+number,
           async:true,
-          success:function(res){
-            console.log(typeof result);
+          success:function(result){
+            // console.log(typeof result);
             // console.log(result);
             // var res = JSON.parse(result);
-            // mobileInfo.groupRisk=res.output.graph.GroupFraudLevel;
-            // mobileInfo.groupRiskDesc=res.output.graph.GroupFraudDesc;
-            d3.select("#groupInfo").html(infoHtml(res));
+            d3.select("#groupInfo").html(infoHtml(result));
           }
         });
       }

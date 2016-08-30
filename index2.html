@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <meta charset="utf-8">
 <link rel="stylesheet" type="text/css" href="style.css">
@@ -5,9 +6,11 @@
 <div id="headBox">
 	<input class="mobileInput" type="text" />
 	<button class="btnQuery">查询风险</button>
+	<img class="log" src="image/person1.png" align="right"/>
 </div>
+<hr/>
 <div id="mainBox" >
-<svg id="svgBox" width="70%">
+<svg id="svgBox" width="70%" height="500">
 </svg>
 <div id="infoBox">
 <div id="mobileInfo"></div>
@@ -25,7 +28,6 @@
 </div></td>
 <td><div class="btnBox">
 	<button class="enlarge"><b>+</b></button>
-  <button class="recovery"><b>□</b></button>
 	<button class="compress"><b>—</b></button> 
 </div></td></tr>
 </table>
@@ -81,10 +83,9 @@ viewRelation(queryData,getType);
 
 function viewRelation(number,getType){
 	
-
-  var width = document.body.clientWidth*0.7;
-  var height=(document.documentElement.clientHeight)*1;
-  var svg = d3.select("svg").attr("height",height);
+	var svg = d3.select("svg");//获取到svg
+    var width = document.body.clientWidth*0.7//返回svg的大小
+    var height = 500;
 
     var tooltip = d3.select("body").append("div")
           .attr("id","tooltip") 
@@ -99,30 +100,25 @@ function viewRelation(number,getType){
     let ck=1; 
     var  zoom=d3.zoom();  
 
-    $(".enlarge").click(function(e){
+    d3.select(".enlarge")
+       .on("click",function(){
           zoom.scaleTo(svg,function(){
             console.log(ck);
-            ck=(ck+0.5)>2?2:ck+0.3;
+            ck=(ck+0.5)>2?2:ck+0.5;
             return ck;
             // return (d3.zoomTransform(svg).k+0.5)>2?2:d3.zoomTransform(svg).k+0.5;
           });
        });
 
-    $(".compress").click(function(e){
+    d3.select(".compress")
+       .on("click",function(){
           zoom.scaleTo(svg,function(){
             console.log(ck);
-            ck=(ck-0.5)<1/3?1/3:ck-0.3;
+            ck=(ck-0.5)<1/3?1/3:ck-0.5;
             return ck;
             // return (d3.zoomTransform(svg).k+0.5)>2?2:d3.zoomTransform(svg).k+0.5;
           });
        });
-    $(".recovery").click(function(e){
-      zoom.scaleTo(svg,function(){
-            console.log(ck);
-            ck=1;
-            return ck;
-          });
-    });
 
      //-----------arrow-----------------
     var defs = svg.append("defs");  
@@ -149,7 +145,7 @@ function viewRelation(number,getType){
                           .attr("orient","auto")
                           .append("path")
                           .attr("d","M2,2 L10,6 L2,10 L6,6 L2,2")
-                          .style("fill","#BDB76B");
+                          .style("fill","#ca0");
 
  console.log(queryData);
  //--------------------------------请求数据-------------------------------
@@ -171,15 +167,7 @@ function viewRelation(number,getType){
 			   .attr("opacity",0.4);
 			return;
 		}else{
-      for(i in result.nodes){
-        if (result.nodes[i].value==queryData) {
-          let riskInfo=result.nodes[i];
-          // riskInfo=$.extend(riskInfo,mobileInfo);
 
-          d3.select("#mobileInfo").html(mobileHtml(riskInfo));
-          break;
-        }
-      }
     }
     var img_w,img_h,distance,r,strength;
     
@@ -210,7 +198,7 @@ function viewRelation(number,getType){
         .force("link", d3.forceLink().id(function(d) { return d.value; }).distance(distance))
         .force("charge", d3.forceManyBody().strength(strength))
         .force("center", d3.forceCenter(width / 2, height / 2))
-        .force("collide", d3.forceCollide(img_w/2).iterations(1));
+        .force("collide", d3.forceCollide(15).iterations(1));
 
     
 
@@ -236,7 +224,7 @@ function viewRelation(number,getType){
           if (d.relation=="OWNS") {          
             return "#0ac";
           } else{
-            return "#BDB76B";}
+            return "#ca0";}
         })
         .attr("stroke-width",1)
         .attr("marker-end",function(d){
@@ -253,8 +241,8 @@ function viewRelation(number,getType){
     simulation.on("end",ended);
     simulation.alphaMin(0.1)
               .alphaTarget(0)
-        .alphaDecay(0.04)
-        .velocityDecay(0.04);
+        .alphaDecay(0.01)
+        .velocityDecay(0.01);
 
     let slink=simulation.force("link");
       slink.links(result.edges);
@@ -302,7 +290,7 @@ function viewRelation(number,getType){
                 }
               }
               if (bx>1) {
-                return 1;
+                return 0.6;
               }else if (bx>0) {
                 return .9;
               }else{
@@ -320,20 +308,17 @@ function viewRelation(number,getType){
 
         });
        
-  	console.log(getType);
-  	let circles=[];
-    if (getType==="riskGraph") {
+        	console.log(getType);
+        	let circles=[];
+        	if (getType==="riskGraph") {
 
-        var circle=node.filter(function(d){
-          if (d.riskSrcType==="mobile_risk" && d.type=="mobile" && d.value!=queryData) {
-            circles.push(d.value);
-            return true;
-          }
-          return false;
-        });
-			  var image=node.filter(d=>d.riskSrcType!="mobile_risk" || d.type=="person" ||d.value==queryData);
+        	  var circle=node.filter(d=> d.out==undefined & d.type=="mobile");
+			  var image=node.filter(d=>d.out | d.type=="person");
+			  // var person=node.filter(d=>d.type=="person");
 			  circle.append("circle")
-			        .attr("r",r)
+			        .attr("r",function(d){
+			        	return r;
+			        })
 			        .style("fill",function(d){
 			        	switch(d.riskLevel){
 			        		case 0:return "#B5B5B5";
@@ -376,14 +361,28 @@ function viewRelation(number,getType){
 			          .style("font-weight","bold")
 			          .style("cursor","default");
         	}else{
-        		var circle=node.filter(function(d){
-          if (d.riskSrcType==="mobile_risk" && d.type=="mobile" && d.value!=queryData) {
-            circles.push(d.value);
-            return true;
-          }
-          return false;
-        });
-        var image=node.filter(d=>d.riskSrcType!="mobile_risk" || d.type=="person" ||d.value==queryData);
+        		circles=[];
+        	  var circle=node.select(function(d){
+        	  	for(i in result.edges){
+        	  		let edge=result.edges[i];
+        	  		if (d.type!="mobile" | edge.source.value==d.value) {
+        	  			return null;
+        	  		}
+        	  	}
+        	  	circles.push(d.value);	
+        	  	return this;
+        	  });
+        	  console.log(circle);
+
+        	  var image=node.select(function(d){
+        	  	for(i in result.edges){
+        	  		let edge=result.edges[i];
+        	  		if (d.type=="person" | edge.source.value==d.value) {
+        	  			return this;
+        	  		}
+        	  	}
+        	  	return null;
+        	  });
         	  image.append("image")
         	  	   .attr("width",img_w)
         	  	   .attr("height",img_h)
@@ -409,7 +408,9 @@ function viewRelation(number,getType){
         	  	   });
 
         	  circle.append("circle")
-			        .attr("r",r)
+			        .attr("r",function(d){
+			        	return r;
+			        })
 			        .style("fill",function(d){
 			        	switch(d.riskLevel){
 			        		case 0:return "#B5B5B5";
@@ -429,8 +430,8 @@ function viewRelation(number,getType){
 	function ticked() {
 	  
 	    dragTick();
-	    link.style("opacity",0);
-	    node.style("opacity",0);
+	    // link.style("opacity",0);
+	    // node.style("opacity",0);
 
 	    console.log(simulation.alpha());
 	}
@@ -531,6 +532,7 @@ function viewRelation(number,getType){
       node.attr("transform",d3.event.transform);
       link.attr("transform",d3.event.transform);
     }
+
 
 }
   });
