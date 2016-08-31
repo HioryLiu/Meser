@@ -92,7 +92,7 @@ viewRelation(queryData,getType);
 
 //-----------------view relation----------------------------
 
-function viewRelation(number,getType){
+function viewRelation(queryNum,getType){
 	
 
   var svg = d3.select("svg").attr("height",height);
@@ -162,9 +162,9 @@ function viewRelation(number,getType){
                           .attr("d","M2,2 L10,6 L2,10 L6,6 L2,2")
                           .style("fill","#BDB76B");
 
-  console.log(queryData);
+  console.log(queryNum);
   
-  var result=sessionStorage[getType+queryData];
+  var result=sessionStorage[getType+queryNum];
   if (result) {
     var res=JSON.parse(result);
     console.log(res);
@@ -173,13 +173,13 @@ function viewRelation(number,getType){
   }else{
     $.ajax({
     type:"GET",
-    url:'http://localhost:3001/'+getType+"?mobile_number="+queryData,
-    // url:'http://192.168.1.101:9090/viz/'+getType+'?mobile_number='+queryData,
-    // url:'http://uat.creditx.io/graphviz/'+getType+'?mobile_number='+queryData,
+    url:'http://localhost:3001/'+getType+"?mobile_number="+queryNum,
+    // url:'http://192.168.1.101:9090/viz/'+getType+'?mobile_number='+queryNum,
+    // url:'http://uat.creditx.io/graphviz/'+getType+'?mobile_number='+queryNum,
     async:false,
     success:function(result){
       View(result);
-      sessionStorage[getType+queryData]=JSON.stringify(result);
+      sessionStorage[getType+queryNum]=JSON.stringify(result);
     }
   });
   }
@@ -201,7 +201,7 @@ function viewRelation(number,getType){
 			return;
 		}else{
       for(i in result.nodes){
-        if (result.nodes[i].value==queryData) {
+        if (result.nodes[i].value==queryNum) {
           let riskInfo=result.nodes[i];
           // riskInfo=$.extend(riskInfo,mobileInfo);
 
@@ -356,13 +356,13 @@ function viewRelation(number,getType){
     if (getType==="riskGraph") {
 
         var circle=node.filter(function(d){
-          if (d.riskSrcType==="mobile_risk" && d.type=="mobile" && d.value!=queryData) {
+          if (d.riskSrcType==="mobile_risk" && d.type=="mobile" && d.value!=queryNum) {
             circles.push(d.value);
             return true;
           }
           return false;
         });
-			  var image=node.filter(d=>d.riskSrcType!="mobile_risk" || d.type=="person" ||d.value==queryData);
+			  var image=node.filter(d=>d.riskSrcType!="mobile_risk" || d.type=="person" ||d.value==queryNum);
 			  circle.append("circle")
 			        .attr("r",r)
 			        .style("fill",function(d){
@@ -389,7 +389,7 @@ function viewRelation(number,getType){
                 return d.imgSize;
              })
 			       .attr("xlink:href",function(d,i){
-			       	 if (d.value==queryData) {
+			       	 if (d.value==queryNum) {
 			       	 	return "image/self.png";
 			       	 }         
 			         if (d.type=="person") {
@@ -420,19 +420,19 @@ function viewRelation(number,getType){
         	}else{
 
         		var circle=node.filter(function(d){
-              if (d.riskSrcType==="mobile_risk" && d.type=="mobile" && d.value!=queryData) {
+              if (d.riskSrcType==="mobile_risk" && d.type=="mobile" && d.value!=queryNum) {
                 circles.push(d.value);
                 return true;
               }
               return false;
             });
 
-            var image=node.filter(d=>d.riskSrcType!="mobile_risk" || d.type=="person" ||d.value==queryData);
+            var image=node.filter(d=>d.riskSrcType!="mobile_risk" || d.type=="person" ||d.value==queryNum);
         	  image.append("image")
         	  	   .attr("width",img_w)
         	  	   .attr("height",img_h)
         	  	   .attr("xlink:href",function(d){
-        	  	   		if (d.value==queryData) {
+        	  	   		if (d.value==queryNum) {
 			       	 	return "image/self.png";
 			       	 }         
 			         if (d.type=="person") {
