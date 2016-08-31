@@ -75,6 +75,8 @@ $(document).ready(function() {
 getMobileRisk(queryData);
 viewRelation(queryData,getType);
 
+//-----------------view relation----------------------------
+
 function viewRelation(number,getType){
 	
 
@@ -177,36 +179,41 @@ function viewRelation(number,getType){
         }
       }
     }
-    var img_w,img_h,distance,r,strength;
+    var img_w,img_h,img_scale,distance,r,strength;
     
     let lenDataset=result.nodes.length;
     if (lenDataset<20){
-        img_h=img_w=38;
+        img_h=img_w=40;
+        img_scale=4.0;
         r=12;
         distance=120;
+        strength=-300;
         }else if(lenDataset<80){
         img_w=img_h=35;
+        img_scale=3.5;
         r=10;
         strength=-200;
         distance=90;
         }else if(lenDataset<200){
-        img_w=img_h=28;
+        img_w=img_h=30;
+        img_scale=3;
         distance=60;
         r=8;
-        strength=-150;
+        strength=-180;
         }else{
-        img_h=img_w=24;
+        img_h=img_w=25;
+        img_scale=2.5;
         distance=30;
         r=6;
-        strength=-100;
+        strength=-150;
     }
 
 
     var simulation = d3.forceSimulation()//创建模拟
-        .force("link", d3.forceLink().id(function(d) { return d.value; }).distance(distance))
+        .force("link", d3.forceLink().id(function(d) { return d.value; }))
         .force("charge", d3.forceManyBody().strength(strength))
         .force("center", d3.forceCenter(width / 2, height / 2))
-        .force("collide", d3.forceCollide(img_w/2).iterations(1));
+        .force("collide", d3.forceCollide(img_w/2+1).iterations(1));
 
     
 
@@ -254,7 +261,8 @@ function viewRelation(number,getType){
 
     let slink=simulation.force("link");
       slink.links(result.edges);
-      // console.log(slink.edges());
+      slink.distance(distance);
+
 
     //----------------node-----------------------
     var node = svg.selectAll(".nodes")
@@ -338,11 +346,22 @@ function viewRelation(number,getType){
 			        		case 3:return "#ff0000";
 			        	}
 			        });
-
 			  image.append("image")
 			       .attr("class","mobile")
-			       .attr("width",img_w)
-			       .attr("height",img_h)
+			       .attr("width",function(d){
+                if (d.out>1) {
+                  return Math.log(d.out)/Math.log(10)*5*img_scale;
+                }else{
+                  return 10*img_scale;
+                }
+             })
+			       .attr("height",function(d){
+                if (d.out>1) {
+                  return Math.log(d.out)/Math.log(10)*5*img_scale;
+                }else{
+                  return 10*img_scale;
+                }
+             })
 			       .attr("xlink:href",function(d,i){
 			       	 if (d.value==queryData) {
 			       	 	return "image/self.png";
@@ -364,22 +383,25 @@ function viewRelation(number,getType){
 				      }
 			       });
 
-			  var circle_text= node.append("text")
+			       var circle_text= node.append("text")
 			          .text(function(d){
 			            return d.out>1?d.out:"";
 			          })
 			          .attr("class","circle_text")
 			          .style("font-weight","bold")
 			          .style("cursor","default");
+
         	}else{
+
         		var circle=node.filter(function(d){
-          if (d.riskSrcType==="mobile_risk" && d.type=="mobile" && d.value!=queryData) {
-            circles.push(d.value);
-            return true;
-          }
-          return false;
-        });
-        var image=node.filter(d=>d.riskSrcType!="mobile_risk" || d.type=="person" ||d.value==queryData);
+              if (d.riskSrcType==="mobile_risk" && d.type=="mobile" && d.value!=queryData) {
+                circles.push(d.value);
+                return true;
+              }
+              return false;
+            });
+
+            var image=node.filter(d=>d.riskSrcType!="mobile_risk" || d.type=="person" ||d.value==queryData);
         	  image.append("image")
         	  	   .attr("width",img_w)
         	  	   .attr("height",img_h)
@@ -436,13 +458,13 @@ function viewRelation(number,getType){
 	        .attr("x1", function(d) { 
 	          let detX=d.target.x-d.source.x;
 	          let detY=d.target.y-d.source.y;
-	            imgM=Math.sqrt(detX*detX+detY*detY)*1.5/img_w;
+	          let  imgM=Math.sqrt(detX*detX+detY*detY)*1.5/img_w;
 	            
 	          return d.source.x + (d.target.x-d.source.x)/imgM; })
 	        .attr("y1", function(d) { 
 	          let detX=d.target.x-d.source.x;
 	          let detY=d.target.y-d.source.y;
-	            imgM=Math.sqrt(detX*detX+detY*detY)*1.5/img_w;  
+	          let  imgM=Math.sqrt(detX*detX+detY*detY)*1.5/img_w;  
 	          return d.source.y + (d.target.y-d.source.y)/imgM; })
 	        .attr("x2", function(d) { 
 	          let detX=d.target.x-d.source.x;
@@ -465,9 +487,12 @@ function viewRelation(number,getType){
 	          	imgM=Math.sqrt(detX*detX+detY*detY)*1.5/img_w;
 	          }
 	         return d.target.y +(d.source.y-d.target.y)/imgM; });
+
+
 	        
 
-	      console.log("ended");      
+	      console.log("ended");  
+        // console.log(slink.links());   
 	      node.style("opacity",1);
 	      link.style("opacity",1);
 	      loadAnim.style("opacity",0);

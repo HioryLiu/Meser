@@ -10380,7 +10380,13 @@ var   keyPrefix$1 = "$";
     if (links == null) links = [];
 
     function defaultStrength(link) {
-      return 1 / Math.min(count[link.source.index], count[link.target.index]);
+      var sDeno = Math.min(count[link.source.index],count[link.target.index]);
+      console.log(sDeno);
+      if (sDeno>15) {
+        return 1/5;
+      }else{
+        return 1 / sDeno;
+      }
     }
 
     function force(alpha) {
