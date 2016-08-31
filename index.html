@@ -35,11 +35,14 @@
 <script src="zepto.js"></script>
 <script src="control.js"></script>
 <script>
-let queryData="15042779179",getType="riskGraph";//默认手机号与显示图
+var queryData="15042779179",getType="riskGraph";//默认手机号与显示图
+var isLoaded=0;
+var width = document.body.clientWidth*0.7;
+var height=(document.documentElement.clientHeight)*1;
 
 $(document).ready(function() {
 
-	let switchFlag;
+	var switchFlag;
 	$(".btnQuery").on('click',function(){
 		queryData=$(".mobileInput").val();
 		if (queryData=="") {
@@ -50,24 +53,36 @@ $(document).ready(function() {
     getMobileRisk(queryData);
 		viewRelation(queryData,getType);
 	});
-	$("#onoffswitch").attr('checked',true);	  
-    $("#onoffswitch").on('click', function(){  
+	$("#onoffswitch").attr('checked',true);	 
+
+  $("#onoffswitch").on('click', function(){  
+    if (isLoaded) {
+      if ($("#onoffswitch").prop('checked')){
+        $("#onoffswitch").attr('checked',true);
+      }else{
+        $("#onoffswitch").attr('checked',false);
+      }
+      return;
+    }
         clickSwitch()  
     });  
   
 
     function clickSwitch(){
-    	console.log(switchFlag);
     	if (switchFlag==0) {
+        isLoaded=0;
     		$("svg").children().remove();
     		getType="riskGraph";
     		viewRelation(queryData,getType);
     		switchFlag=1;
+        
     	}else{
+        isLoaded=0;
     		$("svg").children().remove();
     		getType="graph";
     		viewRelation(queryData,getType);
     		switchFlag=0;
+        
     	}
     }
 });
@@ -80,8 +95,6 @@ viewRelation(queryData,getType);
 function viewRelation(number,getType){
 	
 
-  var width = document.body.clientWidth*0.7;
-  var height=(document.documentElement.clientHeight)*1;
   var svg = d3.select("svg").attr("height",height);
 
     var tooltip = d3.select("body").append("div")
@@ -149,16 +162,34 @@ function viewRelation(number,getType){
                           .attr("d","M2,2 L10,6 L2,10 L6,6 L2,2")
                           .style("fill","#BDB76B");
 
- console.log(queryData);
- //--------------------------------请求数据-------------------------------
-  $.ajax({
-		type:"GET",
-		url:'http://localhost:3001/'+getType+"?mobile_number="+queryData,
+  console.log(queryData);
+  
+  var result=sessionStorage[getType+queryData];
+  if (result) {
+    var res=JSON.parse(result);
+    console.log(res);
+    console.log(typeof res);
+    View(res);
+  }else{
+    $.ajax({
+    type:"GET",
+    url:'http://localhost:3001/'+getType+"?mobile_number="+queryData,
     // url:'http://192.168.1.101:9090/viz/'+getType+'?mobile_number='+queryData,
     // url:'http://uat.creditx.io/graphviz/'+getType+'?mobile_number='+queryData,
-		async:true,
-		success:function(result){
+    async:false,
+    success:function(result){
+      View(result);
+      sessionStorage[getType+queryData]=JSON.stringify(result);
+    }
+  });
+  }
+
+
+ 
+ function View(result){
       // let result=JSON.parse(res);
+      // window.localStorage('...',JSON.stringify(result))
+   
 	//--------------------------------------------------------------------
 		if (result.nodes.length==0 | result.nodes==undefined) {
 			loadAnim.style("opacity",0);
@@ -259,7 +290,6 @@ function viewRelation(number,getType){
             return "url(#arrow2)";
           }
         });
-
 
     //----------------node-----------------------
     var node = svg.selectAll(".nodes")
@@ -443,8 +473,8 @@ function viewRelation(number,getType){
 	function ticked() {
 	  
 	    dragTick();
-	    link.style("opacity",0);
-	    node.style("opacity",0);
+	    // link.style("opacity",0);
+	    // node.style("opacity",0);
 	}
 	function ended(){
 
@@ -490,6 +520,8 @@ function viewRelation(number,getType){
 	      node.style("opacity",1);
 	      link.style("opacity",1);
 	      loadAnim.style("opacity",0);
+
+        isLoaded=1;
 	}
 
 	function dragstarted(d) {
@@ -562,8 +594,9 @@ function viewRelation(number,getType){
     }
 
 }
-  });
+
 }
+
 
 
 
