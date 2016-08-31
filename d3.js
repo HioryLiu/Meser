@@ -10381,7 +10381,6 @@ var   keyPrefix$1 = "$";
 
     function defaultStrength(link) {
       var sDeno = Math.min(count[link.source.index],count[link.target.index]);
-      console.log(sDeno);
       if (sDeno>15) {
         return 1/5;
       }else{

@@ -213,9 +213,19 @@ function viewRelation(number,getType){
         .force("link", d3.forceLink().id(function(d) { return d.value; }))
         .force("charge", d3.forceManyBody().strength(strength))
         .force("center", d3.forceCenter(width / 2, height / 2))
-        .force("collide", d3.forceCollide(img_w/2+1).iterations(1));
+        .force("collide", d3.forceCollide(img_w/2+2).iterations(1));
 
-    
+    simulation.nodes(result.nodes);
+    simulation.on("tick", ticked);
+    simulation.on("end",ended);
+    simulation.alphaMin(0.1)
+              .alphaTarget(0)
+        .alphaDecay(0.04)
+        .velocityDecay(0.04);
+
+    let slink=simulation.force("link");
+      slink.links(result.edges);
+      slink.distance(distance);
 
     //--------------zoom & pan---------------------------------      
     svg.call(zoom.scaleExtent([1/3,2])
@@ -249,19 +259,6 @@ function viewRelation(number,getType){
             return "url(#arrow2)";
           }
         });
-
-
-    simulation.nodes(result.nodes);
-    simulation.on("tick", ticked);
-    simulation.on("end",ended);
-    simulation.alphaMin(0.1)
-              .alphaTarget(0)
-        .alphaDecay(0.04)
-        .velocityDecay(0.04);
-
-    let slink=simulation.force("link");
-      slink.links(result.edges);
-      slink.distance(distance);
 
 
     //----------------node-----------------------
@@ -349,18 +346,17 @@ function viewRelation(number,getType){
 			  image.append("image")
 			       .attr("class","mobile")
 			       .attr("width",function(d){
+              var imgSize;
                 if (d.out>1) {
-                  return Math.log(d.out)/Math.log(10)*5*img_scale;
+                  d.imgSize=imgSize=Math.log(d.out)/Math.log(10)*5*img_scale;
                 }else{
-                  return 10*img_scale;
+                  d.imgSize=imgSize=10*img_scale;
                 }
+                return imgSize;
              })
 			       .attr("height",function(d){
-                if (d.out>1) {
-                  return Math.log(d.out)/Math.log(10)*5*img_scale;
-                }else{
-                  return 10*img_scale;
-                }
+              console.log(d.imgSize);
+                return d.imgSize;
              })
 			       .attr("xlink:href",function(d,i){
 			       	 if (d.value==queryData) {
@@ -449,8 +445,6 @@ function viewRelation(number,getType){
 	    dragTick();
 	    link.style("opacity",0);
 	    node.style("opacity",0);
-
-	    console.log(simulation.alpha());
 	}
 	function ended(){
 
@@ -527,8 +521,20 @@ function viewRelation(number,getType){
 	        .attr("y2",d=>d.target.y);
 	       
 	    image.selectAll("image")
-	         .attr("x",d=>d.x-img_w/2)
-	         .attr("y",d=>d.y-img_h/2);
+	         .attr("x",function(d){
+             if (d.imgSize) {
+              return d.x-d.imgSize/2;
+             }else{
+              return d.x-img_w/2;
+             }
+           })
+	         .attr("y",function(d){
+             if (d.imgSize) {
+              return d.y-d.imgSize/2;
+             }else{
+              return d.y-img_h/2;
+             }
+           });
 	    circle.selectAll("circle")
 	          .attr("cx",d=>d.x)
 	          .attr("cy",d=>d.y);
@@ -539,11 +545,13 @@ function viewRelation(number,getType){
 	            return d.x-5;
 	          }else if (d.out<100) {
 	            return d.x-10;
-	          }else{
+	          }else if (d.out<1000){
 	            return d.x-15;
-	          }
+	          }else{
+              return d.x-20;
+            }
 	        })
-	        .attr("y", function(d) { return d.y+img_h; }); 
+	        .attr("y", function(d) { return d.y+5; }); 
 	    }
 	    
 	}
