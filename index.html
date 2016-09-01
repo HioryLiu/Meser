@@ -56,14 +56,14 @@ $(document).ready(function() {
 	$("#onoffswitch").attr('checked',true);	 
 
   $("#onoffswitch").on('click', function(){  
-    if (isLoaded) {
-      if ($("#onoffswitch").prop('checked')){
-        $("#onoffswitch").attr('checked',true);
-      }else{
-        $("#onoffswitch").attr('checked',false);
-      }
-      return;
-    }
+    // if (isLoaded) {
+    //   if ($("#onoffswitch").prop('checked')){
+    //     $("#onoffswitch").attr('checked',true);
+    //   }else{
+    //     $("#onoffswitch").attr('checked',false);
+    //   }
+    //   return;
+    // }
         clickSwitch()  
     });  
   
@@ -178,8 +178,8 @@ function viewRelation(queryNum,getType){
     // url:'http://uat.creditx.io/graphviz/'+getType+'?mobile_number='+queryNum,
     async:false,
     success:function(result){
-      View(result);
       sessionStorage[getType+queryNum]=JSON.stringify(result);
+      View(result);
     }
   });
   }
@@ -191,7 +191,7 @@ function viewRelation(queryNum,getType){
       // window.localStorage('...',JSON.stringify(result))
    
 	//--------------------------------------------------------------------
-		if (result.nodes.length==0 | result.nodes==undefined) {
+		if (result.nodes.length==0 || result.nodes==undefined) {
 			loadAnim.style("opacity",0);
 			svg.append("image")
 			   .attr("width",width)
